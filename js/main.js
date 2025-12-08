@@ -1,4 +1,4 @@
 import { similarArray } from './util.js';
-import { initDrawImages } from './photos.js';
+import { initGallery } from './gallery.js';
 
 console.dir(similarArray, { depth: null, colors: true });
