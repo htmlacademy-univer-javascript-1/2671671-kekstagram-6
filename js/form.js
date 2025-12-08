@@ -1,4 +1,5 @@
 import Pristine from './vendor/pristine/pristine.min.js';
+import { initImageEditor } from './image-editor.js';
 
 const body = document.body;
 const uploadForm = document.querySelector('.img-upload__form');
@@ -119,9 +120,13 @@ const onDocumentKeydown = (evt) => {
   }
 };
 
+let imageEditor;
+
 const openForm = () => {
   uploadOverlay.classList.remove('hidden');
   body.classList.add('modal-open');
+
+  imageEditor = initImageEditor();
 
   document.addEventListener('keydown', onDocumentKeydown);
   uploadCancel.addEventListener('click', closeForm);
@@ -136,6 +141,10 @@ const closeForm = () => {
 
   uploadForm.reset();
   pristine.reset();
+
+  if (imageEditor) {
+    imageEditor.reset();
+  }
 
   document.removeEventListener('keydown', onDocumentKeydown);
   uploadCancel.removeEventListener('click', closeForm);
