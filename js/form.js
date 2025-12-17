@@ -1,5 +1,7 @@
 import Pristine from './vendor/pristine/pristine.min.js';
 import { initImageEditor } from './image-editor.js';
+import { sendData } from './api.js';
+import { showSuccessMessage, showErrorMessage } from './messages.js';
 
 const body = document.body;
 const uploadForm = document.querySelector('.img-upload__form');
@@ -122,6 +124,18 @@ const onDocumentKeydown = (evt) => {
 
 let imageEditor;
 
+const resetForm = () => {
+  uploadForm.reset();
+  pristine.reset();
+
+  if (imageEditor) {
+    imageEditor.reset();
+  }
+
+  submitButton.disabled = false;
+  submitButton.textContent = 'Опубликовать';
+};
+
 const openForm = () => {
   uploadOverlay.classList.remove('hidden');
   body.classList.add('modal-open');
@@ -138,13 +152,7 @@ const openForm = () => {
 const closeForm = () => {
   uploadOverlay.classList.add('hidden');
   body.classList.remove('modal-open');
-
-  uploadForm.reset();
-  pristine.reset();
-
-  if (imageEditor) {
-    imageEditor.reset();
-  }
+  resetForm();
 
   document.removeEventListener('keydown', onDocumentKeydown);
   uploadCancel.removeEventListener('click', closeForm);
@@ -160,7 +168,24 @@ const onFileInputChange = () => {
   }
 };
 
-const onFormSubmit = (evt) => {
+/**
+ * Отправляет данные формы на сервер
+ */
+const sendFormData = async (formData) => {
+  try {
+    await sendData(formData);
+    closeForm();
+    showSuccessMessage();
+  } catch (error) {
+    showErrorMessage();
+    console.error('Ошибка отправки формы:', error);
+  } finally {
+    submitButton.disabled = false;
+    submitButton.textContent = 'Опубликовать';
+  }
+};
+
+const onFormSubmit = async (evt) => {
   evt.preventDefault();
 
   const isValid = pristine.validate();
@@ -169,22 +194,17 @@ const onFormSubmit = (evt) => {
     submitButton.disabled = true;
     submitButton.textContent = 'Отправка...';
 
-    // Отправка формы (будет реализовано в разделе про работу с сетью)
-    uploadForm.submit();
+    const formData = new FormData(uploadForm);
 
-    console.log('Форма отправлена:', {
-      file: uploadInput.files[0],
-      hashtags: hashtagsInput.value,
-      description: descriptionInput.value,
-      scale: uploadForm.querySelector('.scale__control--value').value,
-      effect: uploadForm.querySelector('input[name="effect"]:checked').value,
-      effectLevel: uploadForm.querySelector('.effect-level__value').value
-    });
+    const scaleValue = uploadForm.querySelector('.scale__control--value').value;
+    const effectValue = uploadForm.querySelector('input[name="effect"]:checked').value;
+    const effectLevelValue = uploadForm.querySelector('.effect-level__value').value;
 
-    setTimeout(() => {
-      submitButton.disabled = false;
-      submitButton.textContent = 'Опубликовать';
-    }, 3000);
+    formData.append('scale', scaleValue);
+    formData.append('effect', effectValue);
+    formData.append('effect-level', effectLevelValue);
+
+    await sendFormData(formData);
   }
 };
 
