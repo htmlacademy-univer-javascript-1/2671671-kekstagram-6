@@ -11,11 +11,27 @@ const uploadCancel = document.querySelector('.img-upload__cancel');
 const hashtagsInput = uploadForm.querySelector('.text__hashtags');
 const descriptionInput = uploadForm.querySelector('.text__description');
 const submitButton = uploadForm.querySelector('.img-upload__submit');
+const imagePreview = document.querySelector('.img-upload__preview img');
+const effectsPreviews = document.querySelectorAll('.effects__preview');
 
 const HASHTAG_REGEX = /^#[a-zа-яё0-9]{1,19}$/i;
 const MAX_HASHTAGS = 5;
 const MAX_HASHTAG_LENGTH = 20;
 const MAX_DESCRIPTION_LENGTH = 140;
+
+const loadAndShowImage = (file) => {
+  const reader = new FileReader();
+
+  reader.addEventListener('load', (evt) => {
+    imagePreview.src = evt.target.result;
+
+    effectsPreviews.forEach((preview) => {
+      preview.style.backgroundImage = `url(${evt.target.result})`;
+    });
+  });
+
+  reader.readAsDataURL(file);
+};
 
 const normalizeHashtags = (hashtagString) => {
   return hashtagString
@@ -128,6 +144,12 @@ const resetForm = () => {
   uploadForm.reset();
   pristine.reset();
 
+  imagePreview.src = 'img/upload-default-image.jpg';
+
+  effectsPreviews.forEach((preview) => {
+    preview.style.backgroundImage = '';
+  });
+
   if (imageEditor) {
     imageEditor.reset();
   }
@@ -136,11 +158,15 @@ const resetForm = () => {
   submitButton.textContent = 'Опубликовать';
 };
 
-const openForm = () => {
+const openForm = (file) => {
   uploadOverlay.classList.remove('hidden');
   body.classList.add('modal-open');
 
   imageEditor = initImageEditor();
+
+  if (file) {
+    loadAndShowImage(file);
+  }
 
   document.addEventListener('keydown', onDocumentKeydown);
   uploadCancel.addEventListener('click', closeForm);
@@ -162,9 +188,21 @@ const closeForm = () => {
 };
 
 const onFileInputChange = () => {
-  if (uploadInput.value) {
-    openForm();
-    // Код для подстановки изображения (отдельное д/з)
+  if (uploadInput.files && uploadInput.files[0]) {
+    const file = uploadInput.files[0];
+
+    if (!file.type.match('image.*')) {
+      alert('Пожалуйста, выберите файл изображения (jpeg, png, gif и т.д.)');
+      return;
+    }
+
+    const MAX_FILE_SIZE = 5 * 1024 * 1024;
+    if (file.size > MAX_FILE_SIZE) {
+      alert('Размер файла не должен превышать 5MB');
+      return;
+    }
+
+    openForm(file);
   }
 };
 
@@ -196,6 +234,10 @@ const onFormSubmit = async (evt) => {
 
     const formData = new FormData(uploadForm);
 
+    if (uploadInput.files[0]) {
+      formData.append('image', uploadInput.files[0]);
+    }
+
     const scaleValue = uploadForm.querySelector('.scale__control--value').value;
     const effectValue = uploadForm.querySelector('input[name="effect"]:checked').value;
     const effectLevelValue = uploadForm.querySelector('.effect-level__value').value;
@@ -203,6 +245,9 @@ const onFormSubmit = async (evt) => {
     formData.append('scale', scaleValue);
     formData.append('effect', effectValue);
     formData.append('effect-level', effectLevelValue);
+
+    formData.append('hashtags', hashtagsInput.value);
+    formData.append('description', descriptionInput.value);
 
     await sendFormData(formData);
   }
