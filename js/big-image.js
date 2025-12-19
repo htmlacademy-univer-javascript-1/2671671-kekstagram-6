@@ -15,14 +15,26 @@ const createCommentElement = (comment) => {
 
   const avatar = document.createElement('img');
   avatar.classList.add('social__picture');
-  avatar.src = comment.avatar;
-  avatar.alt = comment.name;
+
+  if (typeof comment === 'object') {
+    avatar.src = comment.avatar || `img/avatar-${Math.floor(Math.random() * 6) + 1}.svg`;
+    avatar.alt = comment.name || 'Аватар';
+  } else {
+    avatar.src = `img/avatar-${Math.floor(Math.random() * 6) + 1}.svg`;
+    avatar.alt = 'Аватар';
+  }
+
   avatar.width = 35;
   avatar.height = 35;
 
   const text = document.createElement('p');
   text.classList.add('social__text');
-  text.textContent = comment.message;
+
+  if (typeof comment === 'object') {
+    text.textContent = comment.message || comment;
+  } else {
+    text.textContent = comment;
+  }
 
   commentElement.append(avatar, text);
   return commentElement;
@@ -32,9 +44,16 @@ const renderComments = (comments) => {
   socialComments.innerHTML = '';
   const fragment = document.createDocumentFragment();
 
-  comments.forEach((comment) => {
-    fragment.append(createCommentElement(comment));
-  });
+  if (comments.length > 0 && typeof comments[0] === 'object') {
+    comments.forEach((comment) => {
+      fragment.append(createCommentElement(comment));
+    });
+  } else {
+    comments.forEach((commentText) => {
+      const commentObj = { message: commentText };
+      fragment.append(createCommentElement(commentObj));
+    });
+  }
 
   socialComments.append(fragment);
 };
@@ -47,7 +66,7 @@ const closeBigPicture = () => {
   cancelButton.removeEventListener('click', closeBigPicture);
 };
 
-const closeDocumentKeydown = (evt) => {
+const onDocumentKeydown = (evt) => {
   if (evt.key === 'Escape') {
     evt.preventDefault();
     closeBigPicture();
@@ -55,14 +74,30 @@ const closeDocumentKeydown = (evt) => {
 };
 
 const openBigPicture = (pictureData) => {
-
   bigPictureImg.src = pictureData.url;
   bigPictureImg.alt = pictureData.description;
   likesCount.textContent = pictureData.likes;
-  commentsCount.textContent = pictureData.comments.length;
+
+  let commentsLength = 0;
+  if (Array.isArray(pictureData.comments)) {
+    commentsLength = pictureData.comments.length;
+  } else if (typeof pictureData.comments === 'number') {
+    commentsLength = pictureData.comments;
+  }
+
+  commentsCount.textContent = commentsLength;
   socialCaption.textContent = pictureData.description;
 
-  renderComments(pictureData.comments);
+  if (Array.isArray(pictureData.comments)) {
+    renderComments(pictureData.comments);
+  } else {
+    const dummyComments = Array.from({ length: Math.min(commentsLength, 5) }, (_, i) => ({
+      message: `Комментарий ${i + 1}`,
+      name: `Пользователь ${i + 1}`,
+      avatar: `img/avatar-${Math.floor(Math.random() * 6) + 1}.svg`
+    }));
+    renderComments(dummyComments);
+  }
 
   socialCommentCount.classList.add('hidden');
   commentsLoader.classList.add('hidden');
@@ -70,7 +105,7 @@ const openBigPicture = (pictureData) => {
   bigPicture.classList.remove('hidden');
   body.classList.add('modal-open');
 
-  document.addEventListener('keydown', closeDocumentKeydown);
+  document.addEventListener('keydown', onDocumentKeydown);
   cancelButton.addEventListener('click', closeBigPicture);
 };
 

@@ -1,6 +1,8 @@
 const imageTemplate = document.querySelector('#picture').content.querySelector('.picture');
 const picturesStorage = document.querySelector('.pictures');
 
+let nextId = 1;
+
 const createImage = (data) => {
   const image = imageTemplate.cloneNode(true);
 
@@ -8,10 +10,14 @@ const createImage = (data) => {
   picture.src = data.url;
   picture.alt = data.description;
 
-  image.querySelector('.picture__likes').textContent = data.likes;
-  image.querySelector('.picture__comments').textContent = data.comments;
+  const commentsCount = Array.isArray(data.comments) ? data.comments.length : data.comments;
 
-  image.dataset.id = data.id;
+  image.querySelector('.picture__likes').textContent = data.likes;
+  image.querySelector('.picture__comments').textContent = commentsCount;
+
+  image.dataset.id = nextId;
+  data.id = nextId;
+  nextId++;
 
   const link = image.querySelector('a');
   if (link) {
