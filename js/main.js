@@ -1,4 +1,3 @@
-import { similarArray } from './util.js';
 import { getData } from './api.js';
 import { showLoadErrorMessage } from './messages.js';
 import { initGallery } from './gallery.js';
@@ -27,5 +26,3 @@ const initApp = () => {
 };
 
 document.addEventListener('DOMContentLoaded', initApp);
-
-console.dir(similarArray, { depth: null, colors: true });

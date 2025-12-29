@@ -9,32 +9,23 @@ const socialComments = bigPicture.querySelector('.social__comments');
 const socialCommentCount = bigPicture.querySelector('.social__comment-count');
 const commentsLoader = bigPicture.querySelector('.comments-loader');
 
+const AVATAR_WIDTH = 35;
+const AVATAR_HEIGHT = 35;
+
 const createCommentElement = (comment) => {
   const commentElement = document.createElement('li');
   commentElement.classList.add('social__comment');
 
   const avatar = document.createElement('img');
   avatar.classList.add('social__picture');
-
-  if (typeof comment === 'object') {
-    avatar.src = comment.avatar || `img/avatar-${Math.floor(Math.random() * 6) + 1}.svg`;
-    avatar.alt = comment.name || 'Аватар';
-  } else {
-    avatar.src = `img/avatar-${Math.floor(Math.random() * 6) + 1}.svg`;
-    avatar.alt = 'Аватар';
-  }
-
-  avatar.width = 35;
-  avatar.height = 35;
+  avatar.src = comment.avatar;
+  avatar.alt = comment.name;
+  avatar.width = AVATAR_WIDTH;
+  avatar.height = AVATAR_HEIGHT;
 
   const text = document.createElement('p');
   text.classList.add('social__text');
-
-  if (typeof comment === 'object') {
-    text.textContent = comment.message || comment;
-  } else {
-    text.textContent = comment;
-  }
+  text.textContent = comment.message;
 
   commentElement.append(avatar, text);
   return commentElement;
@@ -44,16 +35,9 @@ const renderComments = (comments) => {
   socialComments.innerHTML = '';
   const fragment = document.createDocumentFragment();
 
-  if (comments.length > 0 && typeof comments[0] === 'object') {
-    comments.forEach((comment) => {
-      fragment.append(createCommentElement(comment));
-    });
-  } else {
-    comments.forEach((commentText) => {
-      const commentObj = { message: commentText };
-      fragment.append(createCommentElement(commentObj));
-    });
-  }
+  comments.forEach((comment) => {
+    fragment.append(createCommentElement(comment));
+  });
 
   socialComments.append(fragment);
 };
@@ -77,27 +61,10 @@ const openBigPicture = (pictureData) => {
   bigPictureImg.src = pictureData.url;
   bigPictureImg.alt = pictureData.description;
   likesCount.textContent = pictureData.likes;
-
-  let commentsLength = 0;
-  if (Array.isArray(pictureData.comments)) {
-    commentsLength = pictureData.comments.length;
-  } else if (typeof pictureData.comments === 'number') {
-    commentsLength = pictureData.comments;
-  }
-
-  commentsCount.textContent = commentsLength;
+  commentsCount.textContent = pictureData.comments.length;
   socialCaption.textContent = pictureData.description;
 
-  if (Array.isArray(pictureData.comments)) {
-    renderComments(pictureData.comments);
-  } else {
-    const dummyComments = Array.from({ length: Math.min(commentsLength, 5) }, (_, i) => ({
-      message: `Комментарий ${i + 1}`,
-      name: `Пользователь ${i + 1}`,
-      avatar: `img/avatar-${Math.floor(Math.random() * 6) + 1}.svg`
-    }));
-    renderComments(dummyComments);
-  }
+  renderComments(pictureData.comments);
 
   socialCommentCount.classList.add('hidden');
   commentsLoader.classList.add('hidden');

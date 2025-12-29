@@ -76,6 +76,10 @@ const initSlider = () => {
     return;
   }
 
+  if (effectLevelSlider.noUiSlider) {
+    effectLevelSlider.noUiSlider.destroy();
+  }
+
   noUiSlider.create(effectLevelSlider, {
     range: {
       min: effects.none.min,

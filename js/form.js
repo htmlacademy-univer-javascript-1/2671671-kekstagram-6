@@ -42,6 +42,8 @@ const normalizeHashtags = (hashtagString) => {
     .filter((tag) => tag.length > 0);
 };
 
+let pristine;
+
 const validateHashtags = (value) => {
   if (!value.trim()) {
     return true;
@@ -108,24 +110,6 @@ const validateDescription = (value) => {
   return value.length <= MAX_DESCRIPTION_LENGTH;
 };
 
-const pristine = new Pristine(uploadForm, {
-  classTo: 'img-upload__field-wrapper',
-  errorTextParent: 'img-upload__field-wrapper',
-  errorTextClass: 'img-upload__field-wrapper--error',
-});
-
-pristine.addValidator(
-  hashtagsInput,
-  validateHashtags,
-  getHashtagErrorMessage
-);
-
-pristine.addValidator(
-  descriptionInput,
-  validateDescription,
-  `Длина комментария не может превышать ${MAX_DESCRIPTION_LENGTH} символов`
-);
-
 const stopPropagation = (evt) => {
   if (evt.key === 'Escape') {
     evt.stopPropagation();
@@ -134,6 +118,9 @@ const stopPropagation = (evt) => {
 
 const onDocumentKeydown = (evt) => {
   if (evt.key === 'Escape') {
+    if (document.activeElement === hashtagsInput || document.activeElement === descriptionInput) {
+      return;
+    }
     evt.preventDefault();
     closeForm();
   }
@@ -188,6 +175,8 @@ const closeForm = () => {
   descriptionInput.removeEventListener('keydown', stopPropagation);
 };
 
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
+
 const onFileInputChange = () => {
   if (uploadInput.files && uploadInput.files[0]) {
     const file = uploadInput.files[0];
@@ -197,7 +186,6 @@ const onFileInputChange = () => {
       return;
     }
 
-    const MAX_FILE_SIZE = 5 * 1024 * 1024;
     if (file.size > MAX_FILE_SIZE) {
       alert('Размер файла не должен превышать 5MB');
       return;
@@ -220,7 +208,6 @@ const sendFormData = async (formData) => {
     console.error('Ошибка отправки формы:', error);
   } finally {
     submitButton.disabled = false;
-    submitButton.textContent = 'Опубликовать';
   }
 };
 
@@ -231,24 +218,8 @@ const onFormSubmit = async (evt) => {
 
   if (isValid) {
     submitButton.disabled = true;
-    submitButton.textContent = 'Отправка...';
 
     const formData = new FormData(uploadForm);
-
-    if (uploadInput.files[0]) {
-      formData.append('image', uploadInput.files[0]);
-    }
-
-    const scaleValue = uploadForm.querySelector('.scale__control--value').value;
-    const effectValue = uploadForm.querySelector('input[name="effect"]:checked').value;
-    const effectLevelValue = uploadForm.querySelector('.effect-level__value').value;
-
-    formData.append('scale', scaleValue);
-    formData.append('effect', effectValue);
-    formData.append('effect-level', effectLevelValue);
-
-    formData.append('hashtags', hashtagsInput.value);
-    formData.append('description', descriptionInput.value);
 
     await sendFormData(formData);
   }
@@ -265,6 +236,24 @@ const validateOnInput = () => {
 };
 
 const initForm = () => {
+  pristine = new Pristine(uploadForm, {
+    classTo: 'img-upload__field-wrapper',
+    errorTextParent: 'img-upload__field-wrapper',
+    errorTextClass: 'img-upload__field-wrapper--error',
+  });
+
+  pristine.addValidator(
+    hashtagsInput,
+    validateHashtags,
+    getHashtagErrorMessage
+  );
+
+  pristine.addValidator(
+    descriptionInput,
+    validateDescription,
+    `Длина комментария не может превышать ${MAX_DESCRIPTION_LENGTH} символов`
+  );
+
   uploadInput.addEventListener('change', onFileInputChange);
   uploadForm.addEventListener('submit', onFormSubmit);
 

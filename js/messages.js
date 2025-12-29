@@ -1,6 +1,7 @@
 const showLoadErrorMessage = () => {
   const errorTemplate = document.querySelector('#error').content.cloneNode(true);
   const errorElement = errorTemplate.querySelector('.error');
+  errorElement.style.zIndex = '100';
 
   const messageElement = document.createElement('div');
   messageElement.classList.add('error__inner');
@@ -76,6 +77,7 @@ const showSuccessMessage = () => {
 const showErrorMessage = () => {
   const errorTemplate = document.querySelector('#error').content.cloneNode(true);
   const errorElement = errorTemplate.querySelector('.error');
+  errorElement.style.zIndex = '100';
 
   document.body.appendChild(errorElement);
 
