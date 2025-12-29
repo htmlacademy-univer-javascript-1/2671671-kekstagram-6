@@ -1,6 +1,3 @@
-import noUiSlider from './vendor/nouislider/nouislider.js';
-import './vendor/nouislider/nouislider.css';
-
 const MIN_SCALE = 25;
 const MAX_SCALE = 100;
 const SCALE_STEP = 25;

@@ -1,5 +1,6 @@
 import { drawImages } from './draw-images.js';
 
+
 const RANDOM_PHOTOS_COUNT = 10;
 const RENDER_DELAY = 500;
 

@@ -1,4 +1,4 @@
-import { names, comments, numberOfObjects } from '.data.js';
+import { names, comments, numberOfObjects } from './data.js';
 
 function getRandomNumber (firstNumber, secondNumber) {
 

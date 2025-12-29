@@ -1,7 +1,8 @@
-import Pristine from './vendor/pristine/pristine.min.js';
+// import Pristine from './vendor/pristine/pristine.min.js';
 import { initImageEditor } from './image-editor.js';
 import { sendData } from './api.js';
 import { showSuccessMessage, showErrorMessage } from './messages.js';
+
 
 const body = document.body;
 const uploadForm = document.querySelector('.img-upload__form');

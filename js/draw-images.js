@@ -35,7 +35,6 @@ const drawImages = (photos) => {
     fragment.appendChild(image);
   });
 
-  picturesStorage.innerHTML = '';
   picturesStorage.appendChild(fragment);
 };
 

@@ -1,5 +1,6 @@
-import { initBigPicture } from './big-picture.js';
+import { initBigPicture } from './big-image.js';
 import { drawImages } from './draw-images.js';
+
 
 let currentPhotos = [];
 
